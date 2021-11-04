@@ -37,11 +37,11 @@ func HandleUpdate(event *mesosproto.Event) error {
 
 	switch *update.Status.State {
 	case mesosproto.TASK_FAILED:
-		deleteOldTask(tmp.Status.TaskID)
+		DeleteOldTask(tmp.Status.TaskID)
 	case mesosproto.TASK_KILLED:
-		deleteOldTask(tmp.Status.TaskID)
+		DeleteOldTask(tmp.Status.TaskID)
 	case mesosproto.TASK_LOST:
-		deleteOldTask(tmp.Status.TaskID)
+		DeleteOldTask(tmp.Status.TaskID)
 	}
 
 	// Update Framework State File
