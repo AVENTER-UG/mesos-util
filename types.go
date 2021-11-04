@@ -4,6 +4,10 @@ import (
 	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 )
 
+type HandleOffers func(offers *mesosproto.Event_Offers) error
+type RestartFailedContainer func()
+type Heartbeat func()
+
 type FrameworkConfig struct {
 	FrameworkHostname     string
 	FrameworkPort         string

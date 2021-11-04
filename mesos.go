@@ -36,7 +36,10 @@ func SetConfig(cfg *FrameworkConfig) {
 }
 
 // Subscribe to the mesos backend
-func Subscribe() error {
+func Subscribe(
+	handleoffers HandleOffers,
+	restartfailedcontainer RestartFailedContainer,
+	heartbeat Heartbeat) error {
 
 	subscribeCall := &mesosproto.Call{
 		FrameworkID: config.FrameworkInfo.ID,
@@ -115,16 +118,12 @@ func Subscribe() error {
 		case mesosproto.Event_UPDATE:
 			logrus.Debug("Update", HandleUpdate(&event))
 		case mesosproto.Event_HEARTBEAT:
-			// K3S API Server Heartbeat. If K3S Server is running,
-			// it will also init the K3S Agents if its not already running
-			Heartbeat()
-			// Search missing servers to get the status. But do not restart them.
-			// If everyone is started, then suppress framework
+			heartbeat()
 		case mesosproto.Event_OFFERS:
 			// Search Failed containers and restart them
-			restartFailedContainer()
+			restartfailedcontainer()
 			logrus.Debug("Offer Got")
-			err = HandleOffers(event.Offers)
+			err = handleoffers(event.Offers)
 			if err != nil {
 				logrus.Error("Switch Event HandleOffers: ", err)
 			}
@@ -173,11 +172,6 @@ func Call(message *mesosproto.Call) error {
 	return nil
 }
 
-// Heartbeat is a dummy function
-func Heartbeat() {
-
-}
-
 // Reconcile will reconcile the task states after the framework was restarted
 func Reconcile() {
 	var oldTasks []mesosproto.Call_Reconcile_Task
@@ -220,36 +214,6 @@ func Revive() {
 	}
 }
 
-// Restart failed container
-func restartFailedContainer() {
-	if config.State != nil {
-		for _, element := range config.State {
-			if element.Status != nil {
-				switch *element.Status.State {
-				case mesosproto.TASK_FAILED, mesosproto.TASK_ERROR:
-					if element.Command.IsK3SAgent {
-						logrus.Info("RestartK3SAgent: ", element.Status.TaskID)
-						StartK3SAgent(element.Command.InternalID)
-					}
-					if element.Command.IsK3SServer {
-						logrus.Info("RestartK3SServer: ", element.Status.TaskID)
-						StartK3SServer(element.Command.InternalID)
-					}
-					if element.Command.IsETCD {
-						logrus.Info("RestartETCD: ", element.Status.TaskID)
-						StartEtcd(element.Command.InternalID)
-					}
-					deleteOldTask(element.Status.TaskID)
-				case mesosproto.TASK_KILLED:
-					deleteOldTask(element.Status.TaskID)
-				case mesosproto.TASK_LOST:
-					deleteOldTask(element.Status.TaskID)
-				}
-			}
-		}
-	}
-}
-
 // if all Tasks are running, suppress framework offers
 func suppressFramework() {
 	logrus.Info("Framework Suppress")
@@ -264,7 +228,7 @@ func suppressFramework() {
 
 // Delete Failed Tasks from the config
 func deleteOldTask(taskID mesosproto.TaskID) {
-	copy := make(map[string]cfg.State)
+	copy := make(map[string]State)
 
 	if config.State != nil {
 		for _, element := range config.State {
@@ -303,4 +267,67 @@ func Kill(taskID string) error {
 	}
 
 	return err
+}
+
+func defaultResources(cmd Command) []mesosproto.Resource {
+	CPU := "cpus"
+	MEM := "mem"
+	cpu := cmd.CPU
+	mem := cmd.Memory
+	PORT := "ports"
+
+	res := []mesosproto.Resource{
+		{
+			Name:   CPU,
+			Type:   mesosproto.SCALAR.Enum(),
+			Scalar: &mesosproto.Value_Scalar{Value: cpu},
+		},
+		{
+			Name:   MEM,
+			Type:   mesosproto.SCALAR.Enum(),
+			Scalar: &mesosproto.Value_Scalar{Value: mem},
+		},
+	}
+
+	var portBegin, portEnd uint64
+
+	if cmd.DockerPortMappings != nil {
+		portBegin = uint64(cmd.DockerPortMappings[0].HostPort)
+		portEnd = portBegin + 2
+
+		res = []mesosproto.Resource{
+			{
+				Name:   CPU,
+				Type:   mesosproto.SCALAR.Enum(),
+				Scalar: &mesosproto.Value_Scalar{Value: cpu},
+			},
+			{
+				Name:   MEM,
+				Type:   mesosproto.SCALAR.Enum(),
+				Scalar: &mesosproto.Value_Scalar{Value: mem},
+			},
+			{
+				Name: PORT,
+				Type: mesosproto.RANGES.Enum(),
+				Ranges: &mesosproto.Value_Ranges{
+					Range: []mesosproto.Value_Range{
+						{
+							Begin: portBegin,
+							End:   portEnd,
+						},
+					},
+				},
+			},
+		}
+	}
+
+	return res
+}
+
+func declineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
+	decline := &mesosproto.Call{
+		Type:    mesosproto.Call_DECLINE,
+		Decline: &mesosproto.Call_Decline{OfferIDs: offerIds},
+	}
+	return decline
 }
