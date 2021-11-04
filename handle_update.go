@@ -1,4 +1,4 @@
-package mesos-util
+package mesosutil
 
 import (
 	"encoding/json"
