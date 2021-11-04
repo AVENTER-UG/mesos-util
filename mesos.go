@@ -278,7 +278,7 @@ func DeclineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
 }
 
 // GetOffer get out the offer for the mesos task
-func GetOffer(offers *mesosproto.Event_Offers, cmd mesosutil.Command) (mesosproto.Offer, []mesosproto.OfferID) {
+func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, []mesosproto.OfferID) {
 	offerIds := []mesosproto.OfferID{}
 
 	count := 0
