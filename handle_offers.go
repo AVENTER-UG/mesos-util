@@ -1,4 +1,4 @@
-package mesos
+package mesosutil
 
 import (
 	"errors"
