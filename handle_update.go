@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	mesosproto "github.com/AVENTER-UG/mesos-m3s/proto"
+	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 
 	"github.com/sirupsen/logrus"
 )
