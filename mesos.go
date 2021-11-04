@@ -263,68 +263,13 @@ func Kill(taskID string) error {
 
 	// remove deleted task from state
 	if err == nil {
-		deleteOldTask(task.Status.TaskID)
+		DeleteOldTask(task.Status.TaskID)
 	}
 
 	return err
 }
 
-func defaultResources(cmd Command) []mesosproto.Resource {
-	CPU := "cpus"
-	MEM := "mem"
-	cpu := cmd.CPU
-	mem := cmd.Memory
-	PORT := "ports"
-
-	res := []mesosproto.Resource{
-		{
-			Name:   CPU,
-			Type:   mesosproto.SCALAR.Enum(),
-			Scalar: &mesosproto.Value_Scalar{Value: cpu},
-		},
-		{
-			Name:   MEM,
-			Type:   mesosproto.SCALAR.Enum(),
-			Scalar: &mesosproto.Value_Scalar{Value: mem},
-		},
-	}
-
-	var portBegin, portEnd uint64
-
-	if cmd.DockerPortMappings != nil {
-		portBegin = uint64(cmd.DockerPortMappings[0].HostPort)
-		portEnd = portBegin + 2
-
-		res = []mesosproto.Resource{
-			{
-				Name:   CPU,
-				Type:   mesosproto.SCALAR.Enum(),
-				Scalar: &mesosproto.Value_Scalar{Value: cpu},
-			},
-			{
-				Name:   MEM,
-				Type:   mesosproto.SCALAR.Enum(),
-				Scalar: &mesosproto.Value_Scalar{Value: mem},
-			},
-			{
-				Name: PORT,
-				Type: mesosproto.RANGES.Enum(),
-				Ranges: &mesosproto.Value_Ranges{
-					Range: []mesosproto.Value_Range{
-						{
-							Begin: portBegin,
-							End:   portEnd,
-						},
-					},
-				},
-			},
-		}
-	}
-
-	return res
-}
-
-func declineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
+func DeclineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
 	decline := &mesosproto.Call{
 		Type:    mesosproto.Call_DECLINE,
 		Decline: &mesosproto.Call_Decline{OfferIDs: offerIds},
