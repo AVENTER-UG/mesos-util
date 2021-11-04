@@ -276,3 +276,19 @@ func DeclineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
 	}
 	return decline
 }
+
+// GetOffer get out the offer for the mesos task
+func GetOffer(offers *mesosproto.Event_Offers, cmd mesosutil.Command) (mesosproto.Offer, []mesosproto.OfferID) {
+	offerIds := []mesosproto.OfferID{}
+
+	count := 0
+	for n, offer := range offers.Offers {
+		logrus.Debug("Got Offer From:", offer.GetHostname())
+		offerIds = append(offerIds, offer.ID)
+
+		count = n
+	}
+
+	return offers.Offers[count], offerIds
+
+}
