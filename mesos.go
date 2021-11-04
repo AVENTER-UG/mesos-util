@@ -215,7 +215,7 @@ func Revive() {
 }
 
 // if all Tasks are running, suppress framework offers
-func suppressFramework() {
+func SuppressFramework() {
 	logrus.Info("Framework Suppress")
 	suppress := &mesosproto.Call{
 		Type: mesosproto.Call_SUPPRESS,
@@ -227,7 +227,7 @@ func suppressFramework() {
 }
 
 // Delete Failed Tasks from the config
-func deleteOldTask(taskID mesosproto.TaskID) {
+func DeleteOldTask(taskID mesosproto.TaskID) {
 	copy := make(map[string]State)
 
 	if config.State != nil {
