@@ -7,6 +7,7 @@ import (
 type HandleOffers func(offers *mesosproto.Event_Offers) error
 type RestartFailedContainer func()
 type Heartbeat func()
+type DefaultResources func(cmd Command) []mesosproto.Resource
 
 type FrameworkConfig struct {
 	FrameworkHostname     string

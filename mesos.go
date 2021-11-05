@@ -292,3 +292,115 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 	return offers.Offers[count], offerIds
 
 }
+
+// PrepareTaskInfoExecuteContainer will make the mesos task object container ready
+func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defaultresources DefaultResources) ([]mesosproto.TaskInfo, error) {
+	contype := mesosproto.ContainerInfo_DOCKER.Enum()
+
+	// Set Container Network Mode
+	networkMode := mesosproto.ContainerInfo_DockerInfo_BRIDGE.Enum()
+
+	if cmd.NetworkMode == "host" {
+		networkMode = mesosproto.ContainerInfo_DockerInfo_HOST.Enum()
+	}
+	if cmd.NetworkMode == "none" {
+		networkMode = mesosproto.ContainerInfo_DockerInfo_NONE.Enum()
+	}
+	if cmd.NetworkMode == "user" {
+		networkMode = mesosproto.ContainerInfo_DockerInfo_USER.Enum()
+	}
+	if cmd.NetworkMode == "bridge" {
+		networkMode = mesosproto.ContainerInfo_DockerInfo_BRIDGE.Enum()
+	}
+
+	// Save state of the new task
+	newTaskID := "mcomp_" + cmd.TaskName + "_" + strconv.Itoa(int(cmd.TaskID))
+	tmp := config.State[newTaskID]
+	tmp.Command = cmd
+	config.State[newTaskID] = tmp
+
+	var msg mesosproto.TaskInfo
+
+	msg.Name = cmd.TaskName
+	msg.TaskID = mesosproto.TaskID{
+		Value: newTaskID,
+	}
+	msg.AgentID = agent
+	msg.Resources = defaultresources(cmd)
+
+	msg.Command = &mesosproto.CommandInfo{
+		Shell:       &cmd.Shell,
+		Value:       &cmd.Command,
+		URIs:        cmd.Uris,
+		Environment: &cmd.Environment,
+	}
+
+	msg.Container = &mesosproto.ContainerInfo{
+		Type:     contype,
+		Volumes:  cmd.Volumes,
+		Hostname: &cmd.Hostname,
+		Docker: &mesosproto.ContainerInfo_DockerInfo{
+			Image:        cmd.ContainerImage,
+			Network:      networkMode,
+			PortMappings: cmd.DockerPortMappings,
+			Privileged:   &cmd.Privileged,
+			Parameters:   cmd.DockerParameter,
+		},
+		NetworkInfos: cmd.NetworkInfo,
+	}
+
+	if cmd.Discovery != (mesosproto.DiscoveryInfo{}) {
+		msg.Discovery = &cmd.Discovery
+	}
+
+	if cmd.Labels != nil {
+		msg.Labels = &mesosproto.Labels{
+			Labels: cmd.Labels,
+		}
+	}
+
+	return []mesosproto.TaskInfo{msg}, nil
+}
+
+// HandleUpdate will handle the offers event of mesos
+func HandleUpdate(event *mesosproto.Event) error {
+	// unsuppress
+	revive := &mesosproto.Call{
+		Type: mesosproto.Call_REVIVE,
+	}
+	Call(revive)
+
+	update := event.Update
+
+	msg := &mesosproto.Call{
+		Type: mesosproto.Call_ACKNOWLEDGE,
+		Acknowledge: &mesosproto.Call_Acknowledge{
+			AgentID: *update.Status.AgentID,
+			TaskID:  update.Status.TaskID,
+			UUID:    update.Status.UUID,
+		},
+	}
+
+	// Save state of the task
+	taskID := update.Status.GetTaskID().Value
+	tmp := config.State[taskID]
+	tmp.Status = &update.Status
+
+	logrus.Debugf("HandleUpdate: %s Status %s ", taskID, update.Status.State.String())
+
+	switch *update.Status.State {
+	case mesosproto.TASK_FAILED:
+		DeleteOldTask(tmp.Status.TaskID)
+	case mesosproto.TASK_KILLED:
+		DeleteOldTask(tmp.Status.TaskID)
+	case mesosproto.TASK_LOST:
+		DeleteOldTask(tmp.Status.TaskID)
+	}
+
+	// Update Framework State File
+	config.State[taskID] = tmp
+	persConf, _ := json.Marshal(&config)
+	ioutil.WriteFile(config.FrameworkInfoFile, persConf, 0644)
+
+	return Call(msg)
+}
