@@ -314,7 +314,7 @@ func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defa
 	}
 
 	// Save state of the new task
-	newTaskID := cmd.TaskName + "_" + strconv.Itoa(int(cmd.TaskID))
+	newTaskID := "mcomp_" + cmd.TaskName + "_" + strconv.Itoa(int(cmd.TaskID))
 	tmp := config.State[newTaskID]
 	tmp.Command = cmd
 	config.State[newTaskID] = tmp
@@ -328,13 +328,11 @@ func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defa
 	msg.AgentID = agent
 	msg.Resources = defaultresources(cmd)
 
-	if cmd.Command != "" {
-		msg.Command = &mesosproto.CommandInfo{
-			Shell:       &cmd.Shell,
-			Value:       &cmd.Command,
-			URIs:        cmd.Uris,
-			Environment: &cmd.Environment,
-		}
+	msg.Command = &mesosproto.CommandInfo{
+		Shell:       &cmd.Shell,
+		Value:       &cmd.Command,
+		URIs:        cmd.Uris,
+		Environment: &cmd.Environment,
 	}
 
 	msg.Container = &mesosproto.ContainerInfo{
