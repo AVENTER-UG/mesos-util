@@ -26,7 +26,7 @@ type FrameworkConfig struct {
 	MesosSSL              bool
 	MesosStreamID         string
 	MesosCNI              string
-	TaskID                uint64
+	TaskID                string
 	SSL                   bool
 	State                 map[string]State
 }
@@ -52,7 +52,7 @@ type Command struct {
 	Discovery          mesosproto.DiscoveryInfo                          `protobuf:"bytes,12,opt,name=discovery" json:"discovery,omitempty"`
 	Executor           mesosproto.ExecutorInfo
 	InternalID         int
-	TaskID             uint64
+	TaskID             string
 	Memory             float64
 	CPU                float64
 	Agent              string
