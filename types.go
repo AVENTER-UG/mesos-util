@@ -19,6 +19,8 @@ type FrameworkConfig struct {
 	FrameworkInfo         mesosproto.FrameworkInfo
 	FrameworkInfoFile     string
 	FrameworkInfoFilePath string
+	PortRangeFrom         int
+	PortRangeTo           int
 	CommandChan           chan Command `json:"-"`
 	Username              string
 	Password              string

@@ -1,17 +1,12 @@
 package mesosutil
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 
 	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 
@@ -32,104 +27,6 @@ var marshaller = jsonpb.Marshaler{
 // SetConfig set the global config
 func SetConfig(cfg *FrameworkConfig) {
 	config = cfg
-}
-
-// Subscribe to the mesos backend
-func Subscribe(
-	handleoffers HandleOffers,
-	restartfailedcontainer RestartFailedContainer,
-	heartbeat Heartbeat) error {
-
-	subscribeCall := &mesosproto.Call{
-		FrameworkID: config.FrameworkInfo.ID,
-		Type:        mesosproto.Call_SUBSCRIBE,
-		Subscribe: &mesosproto.Call_Subscribe{
-			FrameworkInfo: &config.FrameworkInfo,
-		},
-	}
-	logrus.Debug(subscribeCall)
-	body, _ := marshaller.MarshalToString(subscribeCall)
-	logrus.Debug(body)
-	client := &http.Client{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	protocol := "https"
-	if !config.MesosSSL {
-		protocol = "http"
-	}
-	req, _ := http.NewRequest("POST", protocol+"://"+config.MesosMasterServer+"/api/v1/scheduler", bytes.NewBuffer([]byte(body)))
-	req.Close = true
-	req.SetBasicAuth(config.Username, config.Password)
-	req.Header.Set("Content-Type", "application/json")
-	res, err := client.Do(req)
-
-	if err != nil {
-		logrus.Fatal(err)
-	}
-
-	reader := bufio.NewReader(res.Body)
-
-	line, _ := reader.ReadString('\n')
-	bytesCount, _ := strconv.Atoi(strings.Trim(line, "\n"))
-
-	/*if config.MesosStreamID != "" {
-		SearchMissingEtcd(true)
-		SearchMissingK3SServer(true)
-		SearchMissingK3SAgent(true)
-	}*/
-
-	for {
-		// Read line from Mesos
-		line, _ = reader.ReadString('\n')
-		line = strings.Trim(line, "\n")
-		// Read important data
-		data := line[:bytesCount]
-		// Rest data will be bytes of next message
-		bytesCount, _ = strconv.Atoi((line[bytesCount:]))
-		var event mesosproto.Event // Event as ProtoBuf
-		err := jsonpb.UnmarshalString(data, &event)
-		if err != nil {
-			logrus.Error(err)
-		}
-		logrus.Debug("Subscribe Got: ", event.GetType())
-
-		/*
-			initStartEtcd()
-				initStartK3SServer()
-				initStartK3SAgent()
-		*/
-
-		switch event.Type {
-		case mesosproto.Event_SUBSCRIBED:
-			logrus.Debug(event)
-			logrus.Info("Subscribed")
-			logrus.Info("FrameworkId: ", event.Subscribed.GetFrameworkID())
-			config.FrameworkInfo.ID = event.Subscribed.GetFrameworkID()
-			config.MesosStreamID = res.Header.Get("Mesos-Stream-Id")
-			// Save framework info
-			persConf, _ := json.Marshal(&config)
-			err = ioutil.WriteFile(config.FrameworkInfoFile, persConf, 0644)
-			if err != nil {
-				logrus.Error("Write FrameWork State File: ", err)
-			}
-		case mesosproto.Event_UPDATE:
-			logrus.Debug("Update", HandleUpdate(&event))
-		case mesosproto.Event_HEARTBEAT:
-			heartbeat()
-		case mesosproto.Event_OFFERS:
-			// Search Failed containers and restart them
-			restartfailedcontainer()
-			logrus.Debug("Offer Got")
-			err = handleoffers(event.Offers)
-			if err != nil {
-				logrus.Error("Switch Event HandleOffers: ", err)
-			}
-		default:
-			logrus.Debug("DEFAULT EVENT: ", event.Offers)
-		}
-	}
 }
 
 // Call will send messages to mesos
@@ -195,26 +92,6 @@ func SuppressFramework() {
 	}
 }
 
-// Delete Failed Tasks from the config
-func DeleteOldTask(taskID mesosproto.TaskID) {
-	copy := make(map[string]State)
-
-	if config.State != nil {
-		for _, element := range config.State {
-			if element.Status != nil {
-				tmpID := element.Status.GetTaskID().Value
-				if element.Status.TaskID != taskID {
-					copy[tmpID] = element
-				} else {
-					logrus.Debug("Delete Task from config: ", tmpID)
-				}
-			}
-		}
-
-		config.State = copy
-	}
-}
-
 // Kill a Task with the given taskID
 func Kill(taskID string) error {
 	task := config.State[taskID]
@@ -229,11 +106,6 @@ func Kill(taskID string) error {
 			AgentID: task.Status.AgentID,
 		},
 	})
-
-	// remove deleted task from state
-	if err == nil {
-		DeleteOldTask(task.Status.TaskID)
-	}
 
 	return err
 }
@@ -262,7 +134,6 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 
 }
 
-// PrepareTaskInfoExecuteContainer will make the mesos task object container ready
 func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defaultresources DefaultResources) ([]mesosproto.TaskInfo, error) {
 	contype := mesosproto.ContainerInfo_DOCKER.Enum()
 
@@ -337,47 +208,4 @@ func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defa
 	}
 
 	return []mesosproto.TaskInfo{msg}, nil
-}
-
-// HandleUpdate will handle the offers event of mesos
-func HandleUpdate(event *mesosproto.Event) error {
-	// unsuppress
-	revive := &mesosproto.Call{
-		Type: mesosproto.Call_REVIVE,
-	}
-	Call(revive)
-
-	update := event.Update
-
-	msg := &mesosproto.Call{
-		Type: mesosproto.Call_ACKNOWLEDGE,
-		Acknowledge: &mesosproto.Call_Acknowledge{
-			AgentID: *update.Status.AgentID,
-			TaskID:  update.Status.TaskID,
-			UUID:    update.Status.UUID,
-		},
-	}
-
-	// Save state of the task
-	taskID := update.Status.GetTaskID().Value
-	tmp := config.State[taskID]
-	tmp.Status = &update.Status
-
-	logrus.Debugf("HandleUpdate: %s Status %s ", taskID, update.Status.State.String())
-
-	switch *update.Status.State {
-	case mesosproto.TASK_FAILED:
-		DeleteOldTask(tmp.Status.TaskID)
-	case mesosproto.TASK_KILLED:
-		DeleteOldTask(tmp.Status.TaskID)
-	case mesosproto.TASK_LOST:
-		DeleteOldTask(tmp.Status.TaskID)
-	}
-
-	// Update Framework State File
-	config.State[taskID] = tmp
-	persConf, _ := json.Marshal(&config)
-	ioutil.WriteFile(config.FrameworkInfoFile, persConf, 0644)
-
-	return Call(msg)
 }
