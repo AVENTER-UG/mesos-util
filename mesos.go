@@ -12,7 +12,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync/atomic"
 
 	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 
@@ -172,36 +171,6 @@ func Call(message *mesosproto.Call) error {
 	return nil
 }
 
-// Reconcile will reconcile the task states after the framework was restarted
-func Reconcile() {
-	var oldTasks []mesosproto.Call_Reconcile_Task
-	logrus.Debug("Reconcile Tasks")
-	maxID := 0
-	if config != nil {
-		for _, t := range config.State {
-			if t.Status != nil {
-				oldTasks = append(oldTasks, mesosproto.Call_Reconcile_Task{
-					TaskID:  t.Status.TaskID,
-					AgentID: t.Status.AgentID,
-				})
-				numericID, err := strconv.Atoi(t.Status.TaskID.GetValue())
-				if err == nil && numericID > maxID {
-					maxID = numericID
-				}
-			}
-		}
-		atomic.StoreUint64(&config.TaskID, uint64(maxID))
-		err := Call(&mesosproto.Call{
-			Type:      mesosproto.Call_RECONCILE,
-			Reconcile: &mesosproto.Call_Reconcile{Tasks: oldTasks},
-		})
-
-		if err != nil {
-			logrus.Error("Call Reconcile: ", err)
-		}
-	}
-}
-
 // Revive will revive the mesos tasks to clean up
 func Revive() {
 	logrus.Debug("Revive Tasks")
@@ -314,7 +283,7 @@ func PrepareTaskInfoExecuteContainer(agent mesosproto.AgentID, cmd Command, defa
 	}
 
 	// Save state of the new task
-	newTaskID := cmd.TaskName + "_" + strconv.Itoa(int(cmd.TaskID))
+	newTaskID := cmd.TaskID
 	tmp := config.State[newTaskID]
 	tmp.Command = cmd
 	config.State[newTaskID] = tmp
