@@ -57,6 +57,7 @@ type Command struct {
 	CPU                float64
 	Agent              string
 	Labels             []mesosproto.Label
+	State              string
 }
 
 // State will have the state of all tasks stated by this framework
