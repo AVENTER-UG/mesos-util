@@ -120,16 +120,37 @@ func DeclineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
 
 // GetOffer get out the offer for the mesos task
 func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, []mesosproto.OfferID) {
-	offerIds := []mesosproto.OfferID{}
+	var offerIds []mesosproto.OfferID
+	var offerret mesosproto.Offer
 
-	count := 0
 	for n, offer := range offers.Offers {
 		logrus.Debug("Got Offer From:", offer.GetHostname())
 		offerIds = append(offerIds, offer.ID)
 
-		count = n
+		// if the ressources of this offer does not matched what the command need, the skip
+		if !isRessourceMatched(offer.Resources, cmd) {
+			Call(DeclineOffer(offerIds))
+			continue
+		}
+		offerret = offers.Offers[n]
+	}
+	return offerret, offerIds
+}
+
+// check if the ressources of the offer are matching the needs of the cmd
+func isRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
+	mem := false
+	cpu := false
+	for _, v := range ressource {
+		if v.GetName() == "cpus" && v.Scalar.GetValue() >= cmd.CPU {
+			logrus.Debug("Matched Offer CPU")
+			cpu = true
+		}
+		if v.GetName() == "mem" && v.Scalar.GetValue() >= cmd.Memory {
+			logrus.Debug("Matched Offer Memory")
+			mem = true
+		}
 	}
 
-	return offers.Offers[count], offerIds
-
+	return mem && cpu
 }
