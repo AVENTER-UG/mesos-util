@@ -128,7 +128,7 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 		offerIds = append(offerIds, offer.ID)
 
 		// if the ressources of this offer does not matched what the command need, the skip
-		if !isRessourceMatched(offer.Resources, cmd) {
+		if !IsRessourceMatched(offer.Resources, cmd) {
 			Call(DeclineOffer(offerIds))
 			continue
 		}
@@ -138,9 +138,15 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 }
 
 // check if the ressources of the offer are matching the needs of the cmd
-func isRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
+func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	mem := false
 	cpu := false
+
+	// if the command have not taskname, the offer does not have to match
+	if cmd.TaskName == "" {
+		return false
+	}
+
 	for _, v := range ressource {
 		if v.GetName() == "cpus" && v.Scalar.GetValue() >= cmd.CPU {
 			logrus.Debug("Matched Offer CPU")
