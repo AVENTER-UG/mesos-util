@@ -93,16 +93,19 @@ func SuppressFramework() {
 }
 
 // Kill a Task with the given taskID
-func Kill(taskID mesosproto.TaskID, agentID *mesosproto.AgentID) error {
+func Kill(taskID string, agentID string) error {
 
-	logrus.Debug("Kill task ", taskID.GetValue())
-
+	logrus.Debug("Kill task ", taskID)
 	// tell mesos to shutdonw the given task
 	err := Call(&mesosproto.Call{
 		Type: mesosproto.Call_KILL,
 		Kill: &mesosproto.Call_Kill{
-			TaskID:  taskID,
-			AgentID: agentID,
+			TaskID: mesosproto.TaskID{
+				Value: taskID,
+			},
+			AgentID: &mesosproto.AgentID{
+				Value: agentID,
+			},
 		},
 	})
 
