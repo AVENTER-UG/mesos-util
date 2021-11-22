@@ -93,17 +93,16 @@ func SuppressFramework() {
 }
 
 // Kill a Task with the given taskID
-func Kill(taskID string) error {
-	task := config.State[taskID]
+func Kill(taskID mesosproto.TaskID, agentID *mesosproto.AgentID) error {
 
-	logrus.Debug("Kill task ", taskID, task)
+	logrus.Debug("Kill task ", taskID.GetValue())
 
 	// tell mesos to shutdonw the given task
 	err := Call(&mesosproto.Call{
 		Type: mesosproto.Call_KILL,
 		Kill: &mesosproto.Call_Kill{
-			TaskID:  task.Status.TaskID,
-			AgentID: task.Status.AgentID,
+			TaskID:  taskID,
+			AgentID: agentID,
 		},
 	})
 
@@ -127,8 +126,13 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 		logrus.Debug("Got Offer From:", offer.GetHostname())
 		offerIds = append(offerIds, offer.ID)
 
+		if cmd.TaskName == "" {
+			continue
+		}
+
 		// if the ressources of this offer does not matched what the command need, the skip
 		if !IsRessourceMatched(offer.Resources, cmd) {
+			logrus.Debug("Could not found any matched ressources, get next offer")
 			Call(DeclineOffer(offerIds))
 			continue
 		}
@@ -141,11 +145,6 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	mem := false
 	cpu := false
-
-	// if the command have not taskname, the offer does not have to match
-	if cmd.TaskName == "" {
-		return false
-	}
 
 	for _, v := range ressource {
 		if v.GetName() == "cpus" && v.Scalar.GetValue() >= cmd.CPU {
