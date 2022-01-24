@@ -1,6 +1,8 @@
 package mesosutil
 
 import (
+	"time"
+
 	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 )
 
@@ -55,6 +57,7 @@ type Command struct {
 	Agent              string
 	Labels             []mesosproto.Label
 	State              string
+	StateTime          time.Time
 }
 
 // State will have the state of all tasks stated by this framework
