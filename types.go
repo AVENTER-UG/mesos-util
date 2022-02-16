@@ -54,11 +54,11 @@ type Command struct {
 	TaskID             string
 	Memory             float64
 	CPU                float64
+	Disk               float64
 	Agent              string
 	Labels             []mesosproto.Label
 	State              string
 	StateTime          time.Time
-	Scale              int
 }
 
 // State will have the state of all tasks stated by this framework
