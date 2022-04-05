@@ -186,7 +186,7 @@ type Event struct {
 	// Type of the event, indicates which optional field below should be
 	// present if that type has a nested message definition.
 	// Enum fields should be optional, see: MESOS-4997.
-	Type         Event_Type          `protobuf:"varint,1,opt,name=type,enum=mesosproto,executor.Event_Type" json:"type"`
+	Type         Event_Type          `protobuf:"varint,1,opt,name=type,enum=mesosproto.executor.Event_Type" json:"type"`
 	Subscribed   *Event_Subscribed   `protobuf:"bytes,2,opt,name=subscribed" json:"subscribed,omitempty"`
 	Acknowledged *Event_Acknowledged `protobuf:"bytes,3,opt,name=acknowledged" json:"acknowledged,omitempty"`
 	Launch       *Event_Launch       `protobuf:"bytes,4,opt,name=launch" json:"launch,omitempty"`
@@ -259,39 +259,39 @@ func (m *Event) GetError() *Event_Error {
 // First event received when the executor subscribes.
 // The 'id' field in the 'framework_info' will be set.
 type Event_Subscribed struct {
-	ExecutorInfo  mesosproto,ExecutorInfo  `protobuf:"bytes,1,req,name=executor_info,json=executorInfo" json:"executor_info"`
-	FrameworkInfo mesosproto,FrameworkInfo `protobuf:"bytes,2,req,name=framework_info,json=frameworkInfo" json:"framework_info"`
-	AgentInfo     mesosproto,AgentInfo     `protobuf:"bytes,3,req,name=agent_info,json=agentInfo" json:"agent_info"`
+	ExecutorInfo  mesosproto.ExecutorInfo  `protobuf:"bytes,1,req,name=executor_info,json=executorInfo" json:"executor_info"`
+	FrameworkInfo mesosproto.FrameworkInfo `protobuf:"bytes,2,req,name=framework_info,json=frameworkInfo" json:"framework_info"`
+	AgentInfo     mesosproto.AgentInfo     `protobuf:"bytes,3,req,name=agent_info,json=agentInfo" json:"agent_info"`
 	// Uniquely identifies the container of an executor run.
-	ContainerID *mesosproto,ContainerID `protobuf:"bytes,4,opt,name=container_id,json=containerId" json:"container_id,omitempty"`
+	ContainerID *mesosproto.ContainerID `protobuf:"bytes,4,opt,name=container_id,json=containerId" json:"container_id,omitempty"`
 }
 
 func (m *Event_Subscribed) Reset()                    { *m = Event_Subscribed{} }
 func (*Event_Subscribed) ProtoMessage()               {}
 func (*Event_Subscribed) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{0, 0} }
 
-func (m *Event_Subscribed) GetExecutorInfo() mesosproto,ExecutorInfo {
+func (m *Event_Subscribed) GetExecutorInfo() mesosproto.ExecutorInfo {
 	if m != nil {
 		return m.ExecutorInfo
 	}
-	return mesosproto,ExecutorInfo{}
+	return mesosproto.ExecutorInfo{}
 }
 
-func (m *Event_Subscribed) GetFrameworkInfo() mesosproto,FrameworkInfo {
+func (m *Event_Subscribed) GetFrameworkInfo() mesosproto.FrameworkInfo {
 	if m != nil {
 		return m.FrameworkInfo
 	}
-	return mesosproto,FrameworkInfo{}
+	return mesosproto.FrameworkInfo{}
 }
 
-func (m *Event_Subscribed) GetAgentInfo() mesosproto,AgentInfo {
+func (m *Event_Subscribed) GetAgentInfo() mesosproto.AgentInfo {
 	if m != nil {
 		return m.AgentInfo
 	}
-	return mesosproto,AgentInfo{}
+	return mesosproto.AgentInfo{}
 }
 
-func (m *Event_Subscribed) GetContainerID() *mesosproto,ContainerID {
+func (m *Event_Subscribed) GetContainerID() *mesosproto.ContainerID {
 	if m != nil {
 		return m.ContainerID
 	}
@@ -300,38 +300,38 @@ func (m *Event_Subscribed) GetContainerID() *mesosproto,ContainerID {
 
 // Received when the framework attempts to launch a task. Once
 // the task is successfully launched, the executor must respond with
-// a TASK_RUNNING update (See TaskState in v1/mesosproto,proto).
+// a TASK_RUNNING update (See TaskState in v1/mesosproto.proto).
 type Event_Launch struct {
-	Task mesosproto,TaskInfo `protobuf:"bytes,1,req,name=task" json:"task"`
+	Task mesosproto.TaskInfo `protobuf:"bytes,1,req,name=task" json:"task"`
 }
 
 func (m *Event_Launch) Reset()                    { *m = Event_Launch{} }
 func (*Event_Launch) ProtoMessage()               {}
 func (*Event_Launch) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{0, 1} }
 
-func (m *Event_Launch) GetTask() mesosproto,TaskInfo {
+func (m *Event_Launch) GetTask() mesosproto.TaskInfo {
 	if m != nil {
 		return m.Task
 	}
-	return mesosproto,TaskInfo{}
+	return mesosproto.TaskInfo{}
 }
 
 // Received when the framework attempts to launch a group of tasks atomically.
 // Similar to `Launch` above the executor must send TASK_RUNNING updates for
 // tasks that are successfully launched.
 type Event_LaunchGroup struct {
-	TaskGroup mesosproto,TaskGroupInfo `protobuf:"bytes,1,req,name=task_group,json=taskGroup" json:"task_group"`
+	TaskGroup mesosproto.TaskGroupInfo `protobuf:"bytes,1,req,name=task_group,json=taskGroup" json:"task_group"`
 }
 
 func (m *Event_LaunchGroup) Reset()                    { *m = Event_LaunchGroup{} }
 func (*Event_LaunchGroup) ProtoMessage()               {}
 func (*Event_LaunchGroup) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{0, 2} }
 
-func (m *Event_LaunchGroup) GetTaskGroup() mesosproto,TaskGroupInfo {
+func (m *Event_LaunchGroup) GetTaskGroup() mesosproto.TaskGroupInfo {
 	if m != nil {
 		return m.TaskGroup
 	}
-	return mesosproto,TaskGroupInfo{}
+	return mesosproto.TaskGroupInfo{}
 }
 
 // Received when the scheduler wants to kill a specific task. Once
@@ -339,25 +339,25 @@ func (m *Event_LaunchGroup) GetTaskGroup() mesosproto,TaskGroupInfo {
 // (or TASK_FAILED) update. The terminal update is necessary so
 // Mesos can release the resources associated with the task.
 type Event_Kill struct {
-	TaskID mesosproto,TaskID `protobuf:"bytes,1,req,name=task_id,json=taskId" json:"task_id"`
+	TaskID mesosproto.TaskID `protobuf:"bytes,1,req,name=task_id,json=taskId" json:"task_id"`
 	// If set, overrides any previously specified kill policy for this task.
 	// This includes 'TaskInfo.kill_policy' and 'Executor.kill.kill_policy'.
 	// Can be used to forcefully kill a task which is already being killed.
-	KillPolicy *mesosproto,KillPolicy `protobuf:"bytes,2,opt,name=kill_policy,json=killPolicy" json:"kill_policy,omitempty"`
+	KillPolicy *mesosproto.KillPolicy `protobuf:"bytes,2,opt,name=kill_policy,json=killPolicy" json:"kill_policy,omitempty"`
 }
 
 func (m *Event_Kill) Reset()                    { *m = Event_Kill{} }
 func (*Event_Kill) ProtoMessage()               {}
 func (*Event_Kill) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{0, 3} }
 
-func (m *Event_Kill) GetTaskID() mesosproto,TaskID {
+func (m *Event_Kill) GetTaskID() mesosproto.TaskID {
 	if m != nil {
 		return m.TaskID
 	}
-	return mesosproto,TaskID{}
+	return mesosproto.TaskID{}
 }
 
-func (m *Event_Kill) GetKillPolicy() *mesosproto,KillPolicy {
+func (m *Event_Kill) GetKillPolicy() *mesosproto.KillPolicy {
 	if m != nil {
 		return m.KillPolicy
 	}
@@ -371,19 +371,19 @@ func (m *Event_Kill) GetKillPolicy() *mesosproto,KillPolicy {
 // They should also be sent by the executor whenever it
 // re-subscribes.
 type Event_Acknowledged struct {
-	TaskID mesosproto,TaskID `protobuf:"bytes,1,req,name=task_id,json=taskId" json:"task_id"`
-	UUID   []byte       `protobuf:"bytes,2,req,name=uuid" json:"uuid,omitempty"`
+	TaskID mesosproto.TaskID `protobuf:"bytes,1,req,name=task_id,json=taskId" json:"task_id"`
+	UUID   []byte            `protobuf:"bytes,2,req,name=uuid" json:"uuid,omitempty"`
 }
 
 func (m *Event_Acknowledged) Reset()                    { *m = Event_Acknowledged{} }
 func (*Event_Acknowledged) ProtoMessage()               {}
 func (*Event_Acknowledged) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{0, 4} }
 
-func (m *Event_Acknowledged) GetTaskID() mesosproto,TaskID {
+func (m *Event_Acknowledged) GetTaskID() mesosproto.TaskID {
 	if m != nil {
 		return m.TaskID
 	}
-	return mesosproto,TaskID{}
+	return mesosproto.TaskID{}
 }
 
 func (m *Event_Acknowledged) GetUUID() []byte {
@@ -440,14 +440,14 @@ func (m *Event_Error) GetMessage() string {
 // "union" trick (see above).
 type Call struct {
 	// Identifies the executor which generated this call.
-	ExecutorID  mesosproto,ExecutorID  `protobuf:"bytes,1,req,name=executor_id,json=executorId" json:"executor_id"`
-	FrameworkID mesosproto,FrameworkID `protobuf:"bytes,2,req,name=framework_id,json=frameworkId" json:"framework_id"`
+	ExecutorID  mesosproto.ExecutorID  `protobuf:"bytes,1,req,name=executor_id,json=executorId" json:"executor_id"`
+	FrameworkID mesosproto.FrameworkID `protobuf:"bytes,2,req,name=framework_id,json=frameworkId" json:"framework_id"`
 	// Type of the call, indicates which optional field below should be
 	// present if that type has a nested message definition.
 	// In case type is SUBSCRIBED, no message needs to be set.
 	// See comments on `Event::Type` above on the reasoning behind this
 	// field being optional.
-	Type      Call_Type       `protobuf:"varint,3,opt,name=type,enum=mesosproto,executor.Call_Type" json:"type"`
+	Type      Call_Type       `protobuf:"varint,3,opt,name=type,enum=mesosproto.executor.Call_Type" json:"type"`
 	Subscribe *Call_Subscribe `protobuf:"bytes,4,opt,name=subscribe" json:"subscribe,omitempty"`
 	Update    *Call_Update    `protobuf:"bytes,5,opt,name=update" json:"update,omitempty"`
 	Message   *Call_Message   `protobuf:"bytes,6,opt,name=message" json:"message,omitempty"`
@@ -457,18 +457,18 @@ func (m *Call) Reset()                    { *m = Call{} }
 func (*Call) ProtoMessage()               {}
 func (*Call) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{1} }
 
-func (m *Call) GetExecutorID() mesosproto,ExecutorID {
+func (m *Call) GetExecutorID() mesosproto.ExecutorID {
 	if m != nil {
 		return m.ExecutorID
 	}
-	return mesosproto,ExecutorID{}
+	return mesosproto.ExecutorID{}
 }
 
-func (m *Call) GetFrameworkID() mesosproto,FrameworkID {
+func (m *Call) GetFrameworkID() mesosproto.FrameworkID {
 	if m != nil {
 		return m.FrameworkID
 	}
-	return mesosproto,FrameworkID{}
+	return mesosproto.FrameworkID{}
 }
 
 func (m *Call) GetType() Call_Type {
@@ -503,15 +503,15 @@ func (m *Call) GetMessage() *Call_Message {
 // it must include a list of all the tasks and updates which haven't been
 // acknowledged by the scheduler.
 type Call_Subscribe struct {
-	UnacknowledgedTasks   []mesosproto,TaskInfo `protobuf:"bytes,1,rep,name=unacknowledged_tasks,json=unacknowledgedTasks" json:"unacknowledged_tasks"`
-	UnacknowledgedUpdates []Call_Update    `protobuf:"bytes,2,rep,name=unacknowledged_updates,json=unacknowledgedUpdates" json:"unacknowledged_updates"`
+	UnacknowledgedTasks   []mesosproto.TaskInfo `protobuf:"bytes,1,rep,name=unacknowledged_tasks,json=unacknowledgedTasks" json:"unacknowledged_tasks"`
+	UnacknowledgedUpdates []Call_Update         `protobuf:"bytes,2,rep,name=unacknowledged_updates,json=unacknowledgedUpdates" json:"unacknowledged_updates"`
 }
 
 func (m *Call_Subscribe) Reset()                    { *m = Call_Subscribe{} }
 func (*Call_Subscribe) ProtoMessage()               {}
 func (*Call_Subscribe) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{1, 0} }
 
-func (m *Call_Subscribe) GetUnacknowledgedTasks() []mesosproto,TaskInfo {
+func (m *Call_Subscribe) GetUnacknowledgedTasks() []mesosproto.TaskInfo {
 	if m != nil {
 		return m.UnacknowledgedTasks
 	}
@@ -529,24 +529,24 @@ func (m *Call_Subscribe) GetUnacknowledgedUpdates() []Call_Update {
 // state to another. Status updates should be used by executors
 // to reliably communicate the status of the tasks that they
 // manage. It is crucial that a terminal update (see TaskState
-// in v1/mesosproto,proto) is sent to the scheduler as soon as the task
+// in v1/mesosproto.proto) is sent to the scheduler as soon as the task
 // terminates, in order for Mesos to release the resources allocated
 // to the task. It is the responsibility of the scheduler to
 // explicitly acknowledge the receipt of a status update. See
 // 'Acknowledged' in the 'Events' section above for the semantics.
 type Call_Update struct {
-	Status mesosproto,TaskStatus `protobuf:"bytes,1,req,name=status" json:"status"`
+	Status mesosproto.TaskStatus `protobuf:"bytes,1,req,name=status" json:"status"`
 }
 
 func (m *Call_Update) Reset()                    { *m = Call_Update{} }
 func (*Call_Update) ProtoMessage()               {}
 func (*Call_Update) Descriptor() ([]byte, []int) { return fileDescriptorExecutor, []int{1, 1} }
 
-func (m *Call_Update) GetStatus() mesosproto,TaskStatus {
+func (m *Call_Update) GetStatus() mesosproto.TaskStatus {
 	if m != nil {
 		return m.Status
 	}
-	return mesosproto,TaskStatus{}
+	return mesosproto.TaskStatus{}
 }
 
 // Sends arbitrary binary data to the scheduler. Note that Mesos
@@ -569,20 +569,20 @@ func (m *Call_Message) GetData() []byte {
 }
 
 func init() {
-	proto.RegisterType((*Event)(nil), "mesosproto,executor.Event")
-	proto.RegisterType((*Event_Subscribed)(nil), "mesosproto,executor.Event.Subscribed")
-	proto.RegisterType((*Event_Launch)(nil), "mesosproto,executor.Event.Launch")
-	proto.RegisterType((*Event_LaunchGroup)(nil), "mesosproto,executor.Event.LaunchGroup")
-	proto.RegisterType((*Event_Kill)(nil), "mesosproto,executor.Event.Kill")
-	proto.RegisterType((*Event_Acknowledged)(nil), "mesosproto,executor.Event.Acknowledged")
-	proto.RegisterType((*Event_Message)(nil), "mesosproto,executor.Event.Message")
-	proto.RegisterType((*Event_Error)(nil), "mesosproto,executor.Event.Error")
-	proto.RegisterType((*Call)(nil), "mesosproto,executor.Call")
-	proto.RegisterType((*Call_Subscribe)(nil), "mesosproto,executor.Call.Subscribe")
-	proto.RegisterType((*Call_Update)(nil), "mesosproto,executor.Call.Update")
-	proto.RegisterType((*Call_Message)(nil), "mesosproto,executor.Call.Message")
-	proto.RegisterEnum("mesosproto,executor.Event_Type", Event_Type_name, Event_Type_value)
-	proto.RegisterEnum("mesosproto,executor.Call_Type", Call_Type_name, Call_Type_value)
+	proto.RegisterType((*Event)(nil), "mesosproto.executor.Event")
+	proto.RegisterType((*Event_Subscribed)(nil), "mesosproto.executor.Event.Subscribed")
+	proto.RegisterType((*Event_Launch)(nil), "mesosproto.executor.Event.Launch")
+	proto.RegisterType((*Event_LaunchGroup)(nil), "mesosproto.executor.Event.LaunchGroup")
+	proto.RegisterType((*Event_Kill)(nil), "mesosproto.executor.Event.Kill")
+	proto.RegisterType((*Event_Acknowledged)(nil), "mesosproto.executor.Event.Acknowledged")
+	proto.RegisterType((*Event_Message)(nil), "mesosproto.executor.Event.Message")
+	proto.RegisterType((*Event_Error)(nil), "mesosproto.executor.Event.Error")
+	proto.RegisterType((*Call)(nil), "mesosproto.executor.Call")
+	proto.RegisterType((*Call_Subscribe)(nil), "mesosproto.executor.Call.Subscribe")
+	proto.RegisterType((*Call_Update)(nil), "mesosproto.executor.Call.Update")
+	proto.RegisterType((*Call_Message)(nil), "mesosproto.executor.Call.Message")
+	proto.RegisterEnum("mesosproto.executor.Event_Type", Event_Type_name, Event_Type_value)
+	proto.RegisterEnum("mesosproto.executor.Call_Type", Call_Type_name, Call_Type_value)
 }
 func (x Event_Type) String() string {
 	s, ok := Event_Type_name[int32(x)]
@@ -2158,14 +2158,14 @@ func NewPopulatedEvent(r randyExecutor, easy bool) *Event {
 
 func NewPopulatedEvent_Subscribed(r randyExecutor, easy bool) *Event_Subscribed {
 	this := &Event_Subscribed{}
-	v1 := mesosproto,NewPopulatedExecutorInfo(r, easy)
+	v1 := mesosproto.NewPopulatedExecutorInfo(r, easy)
 	this.ExecutorInfo = *v1
-	v2 := mesosproto,NewPopulatedFrameworkInfo(r, easy)
+	v2 := mesosproto.NewPopulatedFrameworkInfo(r, easy)
 	this.FrameworkInfo = *v2
-	v3 := mesosproto,NewPopulatedAgentInfo(r, easy)
+	v3 := mesosproto.NewPopulatedAgentInfo(r, easy)
 	this.AgentInfo = *v3
 	if r.Intn(10) == 0 {
-		this.ContainerID = mesosproto,NewPopulatedContainerID(r, easy)
+		this.ContainerID = mesosproto.NewPopulatedContainerID(r, easy)
 	}
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -2174,7 +2174,7 @@ func NewPopulatedEvent_Subscribed(r randyExecutor, easy bool) *Event_Subscribed 
 
 func NewPopulatedEvent_Launch(r randyExecutor, easy bool) *Event_Launch {
 	this := &Event_Launch{}
-	v4 := mesosproto,NewPopulatedTaskInfo(r, easy)
+	v4 := mesosproto.NewPopulatedTaskInfo(r, easy)
 	this.Task = *v4
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -2183,7 +2183,7 @@ func NewPopulatedEvent_Launch(r randyExecutor, easy bool) *Event_Launch {
 
 func NewPopulatedEvent_LaunchGroup(r randyExecutor, easy bool) *Event_LaunchGroup {
 	this := &Event_LaunchGroup{}
-	v5 := mesosproto,NewPopulatedTaskGroupInfo(r, easy)
+	v5 := mesosproto.NewPopulatedTaskGroupInfo(r, easy)
 	this.TaskGroup = *v5
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -2192,10 +2192,10 @@ func NewPopulatedEvent_LaunchGroup(r randyExecutor, easy bool) *Event_LaunchGrou
 
 func NewPopulatedEvent_Kill(r randyExecutor, easy bool) *Event_Kill {
 	this := &Event_Kill{}
-	v6 := mesosproto,NewPopulatedTaskID(r, easy)
+	v6 := mesosproto.NewPopulatedTaskID(r, easy)
 	this.TaskID = *v6
 	if r.Intn(10) != 0 {
-		this.KillPolicy = mesosproto,NewPopulatedKillPolicy(r, easy)
+		this.KillPolicy = mesosproto.NewPopulatedKillPolicy(r, easy)
 	}
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -2204,7 +2204,7 @@ func NewPopulatedEvent_Kill(r randyExecutor, easy bool) *Event_Kill {
 
 func NewPopulatedEvent_Acknowledged(r randyExecutor, easy bool) *Event_Acknowledged {
 	this := &Event_Acknowledged{}
-	v7 := mesosproto,NewPopulatedTaskID(r, easy)
+	v7 := mesosproto.NewPopulatedTaskID(r, easy)
 	this.TaskID = *v7
 	v8 := r.Intn(100)
 	this.UUID = make([]byte, v8)
@@ -2238,9 +2238,9 @@ func NewPopulatedEvent_Error(r randyExecutor, easy bool) *Event_Error {
 
 func NewPopulatedCall(r randyExecutor, easy bool) *Call {
 	this := &Call{}
-	v10 := mesosproto,NewPopulatedExecutorID(r, easy)
+	v10 := mesosproto.NewPopulatedExecutorID(r, easy)
 	this.ExecutorID = *v10
-	v11 := mesosproto,NewPopulatedFrameworkID(r, easy)
+	v11 := mesosproto.NewPopulatedFrameworkID(r, easy)
 	this.FrameworkID = *v11
 	this.Type = Call_Type([]int32{0, 1, 2, 3, 4}[r.Intn(5)])
 	if r.Intn(10) == 0 {
@@ -2261,9 +2261,9 @@ func NewPopulatedCall_Subscribe(r randyExecutor, easy bool) *Call_Subscribe {
 	this := &Call_Subscribe{}
 	if r.Intn(10) != 0 {
 		v12 := r.Intn(5)
-		this.UnacknowledgedTasks = make([]mesosproto,TaskInfo, v12)
+		this.UnacknowledgedTasks = make([]mesosproto.TaskInfo, v12)
 		for i := 0; i < v12; i++ {
-			v13 := mesosproto,NewPopulatedTaskInfo(r, easy)
+			v13 := mesosproto.NewPopulatedTaskInfo(r, easy)
 			this.UnacknowledgedTasks[i] = *v13
 		}
 	}
@@ -2282,7 +2282,7 @@ func NewPopulatedCall_Subscribe(r randyExecutor, easy bool) *Call_Subscribe {
 
 func NewPopulatedCall_Update(r randyExecutor, easy bool) *Call_Update {
 	this := &Call_Update{}
-	v16 := mesosproto,NewPopulatedTaskStatus(r, easy)
+	v16 := mesosproto.NewPopulatedTaskStatus(r, easy)
 	this.Status = *v16
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -2576,10 +2576,10 @@ func (this *Event_Subscribed) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Event_Subscribed{`,
-		`ExecutorInfo:` + strings.Replace(strings.Replace(this.ExecutorInfo.String(), "ExecutorInfo", "mesosproto,ExecutorInfo", 1), `&`, ``, 1) + `,`,
-		`FrameworkInfo:` + strings.Replace(strings.Replace(this.FrameworkInfo.String(), "FrameworkInfo", "mesosproto,FrameworkInfo", 1), `&`, ``, 1) + `,`,
-		`AgentInfo:` + strings.Replace(strings.Replace(this.AgentInfo.String(), "AgentInfo", "mesosproto,AgentInfo", 1), `&`, ``, 1) + `,`,
-		`ContainerID:` + strings.Replace(fmt.Sprintf("%v", this.ContainerID), "ContainerID", "mesosproto,ContainerID", 1) + `,`,
+		`ExecutorInfo:` + strings.Replace(strings.Replace(this.ExecutorInfo.String(), "ExecutorInfo", "mesosproto.ExecutorInfo", 1), `&`, ``, 1) + `,`,
+		`FrameworkInfo:` + strings.Replace(strings.Replace(this.FrameworkInfo.String(), "FrameworkInfo", "mesosproto.FrameworkInfo", 1), `&`, ``, 1) + `,`,
+		`AgentInfo:` + strings.Replace(strings.Replace(this.AgentInfo.String(), "AgentInfo", "mesosproto.AgentInfo", 1), `&`, ``, 1) + `,`,
+		`ContainerID:` + strings.Replace(fmt.Sprintf("%v", this.ContainerID), "ContainerID", "mesosproto.ContainerID", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2589,7 +2589,7 @@ func (this *Event_Launch) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Event_Launch{`,
-		`Task:` + strings.Replace(strings.Replace(this.Task.String(), "TaskInfo", "mesosproto,TaskInfo", 1), `&`, ``, 1) + `,`,
+		`Task:` + strings.Replace(strings.Replace(this.Task.String(), "TaskInfo", "mesosproto.TaskInfo", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2599,7 +2599,7 @@ func (this *Event_LaunchGroup) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Event_LaunchGroup{`,
-		`TaskGroup:` + strings.Replace(strings.Replace(this.TaskGroup.String(), "TaskGroupInfo", "mesosproto,TaskGroupInfo", 1), `&`, ``, 1) + `,`,
+		`TaskGroup:` + strings.Replace(strings.Replace(this.TaskGroup.String(), "TaskGroupInfo", "mesosproto.TaskGroupInfo", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2609,8 +2609,8 @@ func (this *Event_Kill) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Event_Kill{`,
-		`TaskID:` + strings.Replace(strings.Replace(this.TaskID.String(), "TaskID", "mesosproto,TaskID", 1), `&`, ``, 1) + `,`,
-		`KillPolicy:` + strings.Replace(fmt.Sprintf("%v", this.KillPolicy), "KillPolicy", "mesosproto,KillPolicy", 1) + `,`,
+		`TaskID:` + strings.Replace(strings.Replace(this.TaskID.String(), "TaskID", "mesosproto.TaskID", 1), `&`, ``, 1) + `,`,
+		`KillPolicy:` + strings.Replace(fmt.Sprintf("%v", this.KillPolicy), "KillPolicy", "mesosproto.KillPolicy", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2620,7 +2620,7 @@ func (this *Event_Acknowledged) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Event_Acknowledged{`,
-		`TaskID:` + strings.Replace(strings.Replace(this.TaskID.String(), "TaskID", "mesosproto,TaskID", 1), `&`, ``, 1) + `,`,
+		`TaskID:` + strings.Replace(strings.Replace(this.TaskID.String(), "TaskID", "mesosproto.TaskID", 1), `&`, ``, 1) + `,`,
 		`UUID:` + valueToStringExecutor(this.UUID) + `,`,
 		`}`,
 	}, "")
@@ -2651,8 +2651,8 @@ func (this *Call) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Call{`,
-		`ExecutorID:` + strings.Replace(strings.Replace(this.ExecutorID.String(), "ExecutorID", "mesosproto,ExecutorID", 1), `&`, ``, 1) + `,`,
-		`FrameworkID:` + strings.Replace(strings.Replace(this.FrameworkID.String(), "FrameworkID", "mesosproto,FrameworkID", 1), `&`, ``, 1) + `,`,
+		`ExecutorID:` + strings.Replace(strings.Replace(this.ExecutorID.String(), "ExecutorID", "mesosproto.ExecutorID", 1), `&`, ``, 1) + `,`,
+		`FrameworkID:` + strings.Replace(strings.Replace(this.FrameworkID.String(), "FrameworkID", "mesosproto.FrameworkID", 1), `&`, ``, 1) + `,`,
 		`Type:` + fmt.Sprintf("%v", this.Type) + `,`,
 		`Subscribe:` + strings.Replace(fmt.Sprintf("%v", this.Subscribe), "Call_Subscribe", "Call_Subscribe", 1) + `,`,
 		`Update:` + strings.Replace(fmt.Sprintf("%v", this.Update), "Call_Update", "Call_Update", 1) + `,`,
@@ -2666,7 +2666,7 @@ func (this *Call_Subscribe) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Call_Subscribe{`,
-		`UnacknowledgedTasks:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.UnacknowledgedTasks), "TaskInfo", "mesosproto,TaskInfo", 1), `&`, ``, 1) + `,`,
+		`UnacknowledgedTasks:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.UnacknowledgedTasks), "TaskInfo", "mesosproto.TaskInfo", 1), `&`, ``, 1) + `,`,
 		`UnacknowledgedUpdates:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.UnacknowledgedUpdates), "Call_Update", "Call_Update", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
@@ -2677,7 +2677,7 @@ func (this *Call_Update) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Call_Update{`,
-		`Status:` + strings.Replace(strings.Replace(this.Status.String(), "TaskStatus", "mesosproto,TaskStatus", 1), `&`, ``, 1) + `,`,
+		`Status:` + strings.Replace(strings.Replace(this.Status.String(), "TaskStatus", "mesosproto.TaskStatus", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -3150,7 +3150,7 @@ func (m *Event_Subscribed) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.ContainerID == nil {
-				m.ContainerID = &mesosproto,ContainerID{}
+				m.ContainerID = &mesosproto.ContainerID{}
 			}
 			if err := m.ContainerID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -3444,7 +3444,7 @@ func (m *Event_Kill) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.KillPolicy == nil {
-				m.KillPolicy = &mesosproto,KillPolicy{}
+				m.KillPolicy = &mesosproto.KillPolicy{}
 			}
 			if err := m.KillPolicy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -4056,7 +4056,7 @@ func (m *Call_Subscribe) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.UnacknowledgedTasks = append(m.UnacknowledgedTasks, mesosproto,TaskInfo{})
+			m.UnacknowledgedTasks = append(m.UnacknowledgedTasks, mesosproto.TaskInfo{})
 			if err := m.UnacknowledgedTasks[len(m.UnacknowledgedTasks)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
