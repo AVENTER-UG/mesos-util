@@ -16,8 +16,9 @@ package executor
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import mesosproto "github.com/AVENTER-UG/mesos-util"
 import _ "github.com/gogo/protobuf/gogoproto"
+
+import mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 
 import strconv "strconv"
 
