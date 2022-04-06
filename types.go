@@ -49,7 +49,6 @@ type Command struct {
 	DockerParameter    []mesosproto.Parameter                            `protobuf:"bytes,5,rep,name=parameters" json:"parameters,omitempty"`
 	Arguments          []string                                          `protobuf:"bytes,7,rep,name=arguments" json:"arguments,omitempty"`
 	Discovery          mesosproto.DiscoveryInfo                          `protobuf:"bytes,12,opt,name=discovery" json:"discovery,omitempty"`
-	Executor           mesosproto.ExecutorInfo
 	InternalID         int
 	TaskID             string
 	Memory             float64
@@ -59,7 +58,7 @@ type Command struct {
 	Labels             []mesosproto.Label
 	State              string
 	StateTime          time.Time
-	ExecutorInfo       mesosproto.ExecutorInfo
+	Executor           []mesosproto.ExecutorInfo
 }
 
 // State will have the state of all tasks stated by this framework
