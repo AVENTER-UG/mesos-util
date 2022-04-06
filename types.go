@@ -40,15 +40,16 @@ type Command struct {
 	Domain             string                                            `json:"domain,omitempty"`
 	Privileged         bool                                              `json:"privileged,omitempty"`
 	NetworkMode        string                                            `json:"network_mode,omitempty"`
-	Volumes            []mesosproto.Volume                               `protobuf:"bytes,2,rep,name=volumes" json:"volumes,omitempty"`
-	Shell              bool                                              `protobuf:"varint,6,opt,name=shell,def=1" json:"shell,omitempty"`
-	Uris               []mesosproto.CommandInfo_URI                      `protobuf:"bytes,1,rep,name=uris" json:"uris,omitempty"`
-	Environment        mesosproto.Environment                            `protobuf:"bytes,2,opt,name=environment" json:"environment,omitempty"`
-	NetworkInfo        []mesosproto.NetworkInfo                          `protobuf:"bytes,2,opt,name=networkinfo" json:"networkinfo,omitempty"`
-	DockerPortMappings []mesosproto.ContainerInfo_DockerInfo_PortMapping `protobuf:"bytes,3,rep,name=port_mappings,json=portMappings" json:"port_mappings,omitempty"`
-	DockerParameter    []mesosproto.Parameter                            `protobuf:"bytes,5,rep,name=parameters" json:"parameters,omitempty"`
-	Arguments          []string                                          `protobuf:"bytes,7,rep,name=arguments" json:"arguments,omitempty"`
-	Discovery          mesosproto.DiscoveryInfo                          `protobuf:"bytes,12,opt,name=discovery" json:"discovery,omitempty"`
+	Volumes            []mesosproto.Volume                               `protobuf:"bytes,1,rep,name=volumes" json:"volumes,omitempty"`
+	Shell              bool                                              `protobuf:"varint,2,opt,name=shell,def=1" json:"shell,omitempty"`
+	Uris               []mesosproto.CommandInfo_URI                      `protobuf:"bytes,3,rep,name=uris" json:"uris,omitempty"`
+	Environment        mesosproto.Environment                            `protobuf:"bytes,4,opt,name=environment" json:"environment,omitempty"`
+	NetworkInfo        []mesosproto.NetworkInfo                          `protobuf:"bytes,5,opt,name=networkinfo" json:"networkinfo,omitempty"`
+	DockerPortMappings []mesosproto.ContainerInfo_DockerInfo_PortMapping `protobuf:"bytes,6,rep,name=port_mappings,json=portMappings" json:"port_mappings,omitempty"`
+	DockerParameter    []mesosproto.Parameter                            `protobuf:"bytes,7,rep,name=parameters" json:"parameters,omitempty"`
+	Arguments          []string                                          `protobuf:"bytes,8,rep,name=arguments" json:"arguments,omitempty"`
+	Discovery          mesosproto.DiscoveryInfo                          `protobuf:"bytes,9,opt,name=discovery" json:"discovery,omitempty"`
+	Executor           mesosproto.ExecutorInfo                           `protobuf:"bytes,10,opt,name=executor" json:"executor,omitempty"`
 	InternalID         int
 	TaskID             string
 	Memory             float64
@@ -58,7 +59,6 @@ type Command struct {
 	Labels             []mesosproto.Label
 	State              string
 	StateTime          time.Time
-	Executor           []mesosproto.ExecutorInfo
 }
 
 // State will have the state of all tasks stated by this framework
