@@ -59,6 +59,7 @@ type Command struct {
 	Labels             []mesosproto.Label
 	State              string
 	StateTime          time.Time
+	ExecutorInfo       mesosproto.ExecutorInfo
 }
 
 // State will have the state of all tasks stated by this framework
