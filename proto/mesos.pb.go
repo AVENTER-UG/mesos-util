@@ -3097,7 +3097,7 @@ type ExecutorInfo struct {
 	// TODO(vinod): Add support for explicitly setting `type` to `DEFAULT` in
 	// `LAUNCH` operation.
 	Type        ExecutorInfo_Type `protobuf:"varint,15,opt,name=type,enum=mesosproto.ExecutorInfo_Type" json:"type"`
-	ExecutorID  *ExecutorID       `protobuf:"bytes,1,req,name=executor_id,json=executorId" json:"executor_id"`
+	ExecutorID  *ExecutorID       `protobuf:"bytes,1,req,name=executor_id,json=executorId" json:"executor_id,omitempty"`
 	FrameworkID *FrameworkID      `protobuf:"bytes,8,opt,name=framework_id,json=frameworkId" json:"framework_id,omitempty"`
 	Command     *CommandInfo      `protobuf:"bytes,7,opt,name=command" json:"command,omitempty"`
 	// Executor provided with a container will launch the container
