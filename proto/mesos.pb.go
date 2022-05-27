@@ -654,11 +654,13 @@ var MasterInfo_Capability_Type_name = map[int32]string{
 	0: "UNKNOWN",
 	1: "AGENT_UPDATE",
 	2: "AGENT_DRAINING",
+	3: "QUOTA_V2",
 }
 var MasterInfo_Capability_Type_value = map[string]int32{
 	"UNKNOWN":        0,
 	"AGENT_UPDATE":   1,
 	"AGENT_DRAINING": 2,
+	"QUOTA_V2":       3,
 }
 
 func (x MasterInfo_Capability_Type) Enum() *MasterInfo_Capability_Type {
