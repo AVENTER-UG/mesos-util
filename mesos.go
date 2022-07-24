@@ -3,6 +3,7 @@ package mesosutil
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -161,4 +162,38 @@ func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	}
 
 	return mem && cpu
+}
+
+// GetAgentInfo get information about the agent
+func GetAgentInfo(agentID string) MesosAgent {
+	client := &http.Client{}
+	client.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	protocol := "https"
+	if !config.MesosSSL {
+		protocol = "http"
+	}
+	req, _ := http.NewRequest("POST", protocol+"://"+config.MesosMasterServer+"/slaves/"+agentID, nil)
+	req.Close = true
+	req.SetBasicAuth(config.Username, config.Password)
+	req.Header.Set("Mesos-Stream-Id", config.MesosStreamID)
+	req.Header.Set("Content-Type", "application/json")
+	res, err := client.Do(req)
+
+	if err != nil {
+		logrus.WithField("func", "getAgentInfo").Error("Could not connect to agent: ", err.Error())
+		return MesosAgent{}
+	}
+
+	defer res.Body.Close()
+
+	var agent MesosAgent
+	err = json.NewDecoder(res.Body).Decode(&agent)
+	if err != nil {
+		logrus.WithField("func", "getAgentInfo").Error("Could not encode json result: ", err.Error())
+		return MesosAgent{}
+	}
+	return agent
 }
