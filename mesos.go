@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	mesosproto "github.com/AVENTER-UG/mesos-util/proto"
 
@@ -253,4 +254,14 @@ func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 		}
 	}
 	return []mesosproto.NetworkInfo{}
+}
+
+// DecodeTask will decode the key into an mesos command struct
+func DecodeTask(key string) Command {
+	var task Command
+	err := json.NewDecoder(strings.NewReader(key)).Decode(&task)
+	if err != nil {
+		return Command{}
+	}
+	return task
 }
