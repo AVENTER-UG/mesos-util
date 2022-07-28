@@ -151,3 +151,35 @@ type MesosAgent struct {
 	} `json:"slaves"`
 	RecoveredSlaves []interface{} `json:"recovered_slaves"`
 }
+
+// MesosTasks hold the information of the task
+type MesosTasks struct {
+	Tasks []struct {
+		ID          string `json:"id"`
+		Name        string `json:"name"`
+		FrameworkID string `json:"framework_id"`
+		ExecutorID  string `json:"executor_id"`
+		SlaveID     string `json:"slave_id"`
+		AgentID     string `json:"agent_id"`
+		State       string `json:"state"`
+		Resources   struct {
+			Disk float64 `json:"disk"`
+			Mem  float64 `json:"mem"`
+			Gpus float64 `json:"gpus"`
+			Cpus float64 `json:"cpus"`
+		} `json:"resources"`
+		Role     string `json:"role"`
+		Statuses []struct {
+			State           string  `json:"state"`
+			Timestamp       float64 `json:"timestamp"`
+			ContainerStatus struct {
+				ContainerID struct {
+					Value string `json:"value"`
+				} `json:"container_id"`
+				NetworkInfos []mesosproto.NetworkInfo `json:"network_infos"`
+			} `json:"container_status,omitempty"`
+		} `json:"statuses"`
+		Discovery mesosproto.DiscoveryInfo `json:"discovery"`
+		Container mesosproto.ContainerInfo `json:"container"`
+	} `json:"tasks"`
+}

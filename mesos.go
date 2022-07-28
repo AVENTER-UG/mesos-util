@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 
@@ -196,4 +197,60 @@ func GetAgentInfo(agentID string) MesosAgent {
 		return MesosAgent{}
 	}
 	return agent
+}
+
+//  GetNetworkInfo get network info of task
+func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
+	client := &http.Client{}
+	// #nosec G402
+	client.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	protocol := "https"
+	if !config.MesosSSL {
+		protocol = "http"
+	}
+	req, _ := http.NewRequest("POST", protocol+"://"+config.MesosMasterServer+"/tasks/?task_id="+taskID+"&framework_id="+config.FrameworkInfo.ID.GetValue(), nil)
+	req.Close = true
+	req.SetBasicAuth(config.Username, config.Password)
+	req.Header.Set("Content-Type", "application/json")
+	res, err := client.Do(req)
+
+	if err != nil {
+		logrus.WithField("func", "getNetworkInfo").Error("Could not connect to agent: ", err.Error())
+		return []mesosproto.NetworkInfo{}
+	}
+
+	defer res.Body.Close()
+
+	var task MesosTasks
+	err = json.NewDecoder(res.Body).Decode(&task)
+	if err != nil {
+		logrus.WithField("func", "getAgentInfo").Error("Could not encode json result: ", err.Error())
+		return []mesosproto.NetworkInfo{}
+	}
+
+	if len(task.Tasks) > 0 {
+		for _, status := range task.Tasks[0].Statuses {
+			if status.State == "TASK_RUNNING" {
+				var netw []mesosproto.NetworkInfo
+				netw = append(netw, status.ContainerStatus.NetworkInfos[0])
+				// try to resolv the tasks hostname
+				if task.Tasks[0].Container.Hostname != nil {
+					addr, err := net.LookupIP(*task.Tasks[0].Container.Hostname)
+					if err == nil {
+						hostNet := []mesosproto.NetworkInfo{{
+							IPAddresses: []mesosproto.NetworkInfo_IPAddress{{
+								IPAddress: func() *string { x := string(addr[0]); return &x }(),
+							}}},
+						}
+						netw = append(netw, hostNet[0])
+					}
+				}
+				return netw
+			}
+		}
+	}
+	return []mesosproto.NetworkInfo{}
 }
