@@ -148,9 +148,10 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 }
 
 // check if the ressources of the offer are matching the needs of the cmd
-func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
+func IsRessourceMatched(ressource []mesosproto.Resource, cmd mesosutil.Command) bool {
 	mem := false
 	cpu := false
+	ports := false
 
 	for _, v := range ressource {
 		if v.GetName() == "cpus" && v.Scalar.GetValue() >= cmd.CPU {
@@ -161,9 +162,22 @@ func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 			logrus.Debug("Matched Offer Memory")
 			mem = true
 		}
+		if v.GetName() == "ports" {
+			for _, taskPort := range cmd.DockerPortMappings {
+				for _, portRange := range v.GetRanges().Range {
+					if taskPort.HostPort >= uint32(portRange.Begin) && taskPort.HostPort <= uint32(portRange.End) {
+						logrus.Debug("Matched Offer TaskPort: ", taskPort.HostPort)
+						logrus.Debug("Matched Offer RangePort: ", portRange)
+						ports = ports || true
+						break
+					}
+					ports = ports || false
+				}
+			}
+		}
 	}
 
-	return mem && cpu
+	return mem && cpu && ports
 }
 
 // GetAgentInfo get information about the agent
