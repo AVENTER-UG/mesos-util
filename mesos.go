@@ -148,7 +148,7 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 }
 
 // check if the ressources of the offer are matching the needs of the cmd
-func IsRessourceMatched(ressource []mesosproto.Resource, cmd mesosutil.Command) bool {
+func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	mem := false
 	cpu := false
 	ports := false
