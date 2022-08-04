@@ -57,7 +57,7 @@ type Command struct {
 	Disk               float64
 	Agent              string
 	Labels             []mesosproto.Label
-	State              string `json:"String"`
+	State              string `json:"State"`
 	StateTime          time.Time
 	Instances          int
 	LinuxInfo          mesosproto.LinuxInfo `protobuf:"bytes,11,opt,name=linux_info,json=linuxInfo" json:"linux_info,omitempty"`
