@@ -61,7 +61,7 @@ type Command struct {
 	StateTime          time.Time
 	Instances          int
 	LinuxInfo          mesosproto.LinuxInfo `protobuf:"bytes,11,opt,name=linux_info,json=linuxInfo" json:"linux_info,omitempty"`
-	MesosAgent         MesosAgent
+	MesosAgent         MesosSlaves
 }
 
 // State will have the state of all tasks stated by this framework
