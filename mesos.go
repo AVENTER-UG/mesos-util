@@ -181,7 +181,7 @@ func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 }
 
 // GetAgentInfo get information about the agent
-func GetAgentInfo(agentID string) MesosAgent {
+func GetAgentInfo(agentID string) MesosSlaves {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -200,7 +200,7 @@ func GetAgentInfo(agentID string) MesosAgent {
 
 	if err != nil {
 		logrus.WithField("func", "getAgentInfo").Error("Could not connect to agent: ", err.Error())
-		return MesosAgent{}
+		return MesosSlaves{}
 	}
 
 	defer res.Body.Close()
@@ -209,9 +209,17 @@ func GetAgentInfo(agentID string) MesosAgent {
 	err = json.NewDecoder(res.Body).Decode(&agent)
 	if err != nil {
 		logrus.WithField("func", "getAgentInfo").Error("Could not encode json result: ", err.Error())
-		return MesosAgent{}
+		return MesosSlaves{}
 	}
-	return agent
+
+	// get the used agent info
+	for _, a := range agent.Slaves {
+		if a.ID == agentID {
+			return a
+		}
+	}
+
+	return MesosSlaves{}
 }
 
 //  GetNetworkInfo get network info of task
