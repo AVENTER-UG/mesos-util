@@ -162,18 +162,22 @@ func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 			logrus.Debug("Matched Offer Memory")
 			mem = true
 		}
-		if v.GetName() == "ports" {
-			for _, taskPort := range cmd.DockerPortMappings {
-				for _, portRange := range v.GetRanges().Range {
-					if taskPort.HostPort >= uint32(portRange.Begin) && taskPort.HostPort <= uint32(portRange.End) {
-						logrus.Debug("Matched Offer TaskPort: ", taskPort.HostPort)
-						logrus.Debug("Matched Offer RangePort: ", portRange)
-						ports = ports || true
-						break
+		if len(cmd.DockerPortMappings) > 0 {
+			if v.GetName() == "ports" {
+				for _, taskPort := range cmd.DockerPortMappings {
+					for _, portRange := range v.GetRanges().Range {
+						if taskPort.HostPort >= uint32(portRange.Begin) && taskPort.HostPort <= uint32(portRange.End) {
+							logrus.Debug("Matched Offer TaskPort: ", taskPort.HostPort)
+							logrus.Debug("Matched Offer RangePort: ", portRange)
+							ports = ports || true
+							break
+						}
+						ports = ports || false
 					}
-					ports = ports || false
 				}
 			}
+		} else {
+			ports = true
 		}
 	}
 
@@ -283,6 +287,7 @@ func DecodeTask(key string) Command {
 	var task Command
 	err := json.NewDecoder(strings.NewReader(key)).Decode(&task)
 	if err != nil {
+		logrus.WithField("func", "DecodeTask").Error("Could not decode task: ", err.Error())
 		return Command{}
 	}
 	return task
