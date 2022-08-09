@@ -151,7 +151,7 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	mem := false
 	cpu := false
-	ports := false
+	ports := true
 
 	for _, v := range ressource {
 		if v.GetName() == "cpus" && v.Scalar.GetValue() >= cmd.CPU {
@@ -176,8 +176,6 @@ func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 					}
 				}
 			}
-		} else {
-			ports = true
 		}
 	}
 
