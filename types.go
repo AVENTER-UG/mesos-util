@@ -50,6 +50,7 @@ type Command struct {
 	Arguments          []string                                          `protobuf:"bytes,8,rep,name=arguments" json:"arguments,omitempty"`
 	Discovery          mesosproto.DiscoveryInfo                          `protobuf:"bytes,9,opt,name=discovery" json:"discovery,omitempty"`
 	Executor           mesosproto.ExecutorInfo                           `protobuf:"bytes,10,opt,name=executor" json:"executor,omitempty"`
+	Restart            string
 	InternalID         int
 	TaskID             string
 	Memory             float64
