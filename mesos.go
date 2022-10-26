@@ -264,7 +264,7 @@ func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 				// try to resolv the tasks hostname
 				if task.Tasks[0].Container.Hostname != nil {
 					addr, err := net.LookupIP(*task.Tasks[0].Container.Hostname)
-					if err == nil {
+					if err == nil && !strings.Contains(addr[0], "\n") {
 						hostNet := []mesosproto.NetworkInfo{{
 							IPAddresses: []mesosproto.NetworkInfo_IPAddress{{
 								IPAddress: func() *string { x := string(addr[0]); return &x }(),
