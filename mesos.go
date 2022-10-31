@@ -265,15 +265,14 @@ func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 				if task.Tasks[0].Container.Hostname != nil {
 					addr, err := net.LookupIP(*task.Tasks[0].Container.Hostname)
 					if err == nil {
-						// check if the string is a valid IP. If yes, then the retrun value is unequal nil.
-						if net.ParseIP(addr[0]) != nil {
-							hostNet := []mesosproto.NetworkInfo{{
-								IPAddresses: []mesosproto.NetworkInfo_IPAddress{{
-									IPAddress: func() *string { x := string(addr[0]); return &x }(),
-								}}},
-							}
-							netw = append(netw, hostNet[0])
+						hostNet := []mesosproto.NetworkInfo{{
+							IPAddresses: []mesosproto.NetworkInfo_IPAddress{{
+								IPAddress: func() *string { x := string(addr[0]); return &x }(),
+							}}},
 						}
+						netw = append(netw, hostNet[0])
+					} else {
+						netw = append(netw, status.ContainerStatus.NetworkInfos[0])
 					}
 				}
 				return netw
