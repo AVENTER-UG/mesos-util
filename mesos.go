@@ -83,7 +83,7 @@ func Revive() {
 	}
 }
 
-// if all Tasks are running, suppress framework offers
+// SuppressFramework if all Tasks are running, suppress framework offers
 func SuppressFramework() {
 	logrus.Info("Framework Suppress")
 	suppress := &mesosproto.Call{
@@ -115,6 +115,7 @@ func Kill(taskID string, agentID string) error {
 	return err
 }
 
+// DeclineOffer will decline the given offers
 func DeclineOffer(offerIds []mesosproto.OfferID) *mesosproto.Call {
 	decline := &mesosproto.Call{
 		Type:    mesosproto.Call_DECLINE,
@@ -147,7 +148,7 @@ func GetOffer(offers *mesosproto.Event_Offers, cmd Command) (mesosproto.Offer, [
 	return offerret, offerIds
 }
 
-// check if the ressources of the offer are matching the needs of the cmd
+// IsRessourceMatched - check if the ressources of the offer are matching the needs of the cmd
 func IsRessourceMatched(ressource []mesosproto.Resource, cmd Command) bool {
 	mem := false
 	cpu := false
@@ -200,31 +201,39 @@ func GetAgentInfo(agentID string) MesosSlaves {
 	req.Header.Set("Content-Type", "application/json")
 	res, err := client.Do(req)
 
-	if err != nil {
-		logrus.WithField("func", "getAgentInfo").Error("Could not connect to agent: ", err.Error())
-		return MesosSlaves{}
-	}
+	if res.StatusCode == http.StatusOK {
 
-	defer res.Body.Close()
+		if err != nil {
+			logrus.WithField("func", "getAgentInfo").Error("Could not connect to agent: ", err.Error())
+			return MesosSlaves{}
+		}
 
-	var agent MesosAgent
-	err = json.NewDecoder(res.Body).Decode(&agent)
-	if err != nil {
-		logrus.WithField("func", "getAgentInfo").Error("Could not encode json result: ", err.Error())
-		return MesosSlaves{}
-	}
+		defer res.Body.Close()
 
-	// get the used agent info
-	for _, a := range agent.Slaves {
-		if a.ID == agentID {
-			return a
+		var agent MesosAgent
+		err = json.NewDecoder(res.Body).Decode(&agent)
+		if err != nil {
+			logrus.WithField("func", "getAgentInfo").Error("Could not encode json result: ", err.Error())
+			// if there is an error, dump out the res.Body as debug
+			bodyBytes, err := io.ReadAll(res.Body)
+			if err == nil {
+				logrus.WithField("func", "getAgentInfo").Debug("response Body Dump: ", string(bodyBytes))
+			}
+			return MesosSlaves{}
+		}
+
+		// get the used agent info
+		for _, a := range agent.Slaves {
+			if a.ID == agentID {
+				return a
+			}
 		}
 	}
 
 	return MesosSlaves{}
 }
 
-//  GetNetworkInfo get network info of task
+// GetNetworkInfo get network info of task
 func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 	client := &http.Client{}
 	// #nosec G402
@@ -263,6 +272,7 @@ func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 				netw = append(netw, status.ContainerStatus.NetworkInfos[0])
 				// try to resolv the tasks hostname
 				if task.Tasks[0].Container.Hostname != nil {
+					netw = []mesosproto.NetworkInfo{}
 					addr, err := net.LookupIP(*task.Tasks[0].Container.Hostname)
 					if err == nil {
 						hostNet := []mesosproto.NetworkInfo{{
@@ -271,8 +281,6 @@ func GetNetworkInfo(taskID string) []mesosproto.NetworkInfo {
 							}}},
 						}
 						netw = append(netw, hostNet[0])
-					} else {
-						netw = append(netw, status.ContainerStatus.NetworkInfos[0])
 					}
 				}
 				return netw
